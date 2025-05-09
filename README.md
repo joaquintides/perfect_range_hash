@@ -1,6 +1,6 @@
 # perfect_range_hash
 
-We want to the extimate the probability that the function
+We want to the estimate the probability that the function
 
 $$h(x)= \left(Cx \bmod 2^{64}\right)\texttt{ >> } \left(64-m\right) = \left\lfloor\frac{Cx \bmod 2^{64}}{2^{64-m}}\right\rfloor$$
 

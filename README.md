@@ -62,5 +62,5 @@ Each value change introduces a possibility of a collision with a probability tha
 we estimate, without formal justification, as $$n/2^m$$.
 Wrapping it all together, we have
 
-$$P(h(x)\text{ is injective}) = \left(1-2^{\left\lceil \log_2 n\right\rceil-m-1}\right) \left[1- \left( 1- \left( \frac{n}{2^m} \right)^{\frac{(B-1)(n-1)}{2B}}\right)\right].$$
+$$P(h(x)\text{ is injective}) \approxeq \left(1-2^{\left\lceil \log_2 n\right\rceil-m-1}\right) \left( 1- \frac{n}{2^m}\right)^{\frac{(B-1)(n-1)}{2B}}.$$
 

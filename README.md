@@ -100,5 +100,5 @@ but rather follow a distribution $$a+di$$, where $$d$$ is `sizeof(std::type_info
 This does not affect the analysis at all, as a valid constant $$C$$ for the former case
 produces a valid constant $$Cd$$ for the latter.
 
-So, the analysis is applicable to Boost.OpenMethod and explains its, at first sight, unreasonable
+So, the analysis is applicable to Boost.OpenMethod and explains its seemingly unreasonable
 efficiency at finding perfect hash functions for type IDs.

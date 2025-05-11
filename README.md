@@ -82,5 +82,7 @@ $$P(h(x)\text{ is injective}) \approxeq \left(1-2^{\left\lceil \log_2 n\right\rc
 The figure plots this function for several choices of $$n$$ and $$m$$ (solid lines)
 alongside actual values obtained via numerical simulation (crosses):
 
+![chart](chart.png)
+
 TBW.
 

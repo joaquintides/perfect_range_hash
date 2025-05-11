@@ -11,17 +11,17 @@ C*x>>64-m // in 64-bit mode
 
 where `x` is a `type_id`, `C` is a random 64-bit number, and the number of buckets is 2<sup>`m`</sup>.
 `fast_perfect_hash` selects the minimum `m` able to hold `n` elements and tries up to 100,000 random values
-for `C` till one of them happens to produce a perfect (no-collison) hadh function. If none is found,
+for `C` till one of them happens to produce a perfect (no-collision) hash function. If none is found,
 `m` is increased by 1 (the number of buckets is doubled), a viable `C` is searched again, and so on.
 
 This brute-force approach works very well, but there's an apparent contradiction: an arbitrary
-function $$f(x)$$ mapping $$n$$ pre-selected elements into $$2^m$$ buckets has a probability
+function $$f(x)$$ mapping $$n$$ pre-selected elements into $$2^m$$ buckets has a combinatorial probability
 of being a perfect hash function equal to
 
 $$P(n,m)=\frac{\left(2^m\right)!}{2^{mn}\left(2^m-n\right)!}$$
 
 (see [this presentation](https://github.com/joaquintides/usingstdcpp2024) for details);
-ff, say, $$n=100$$ and $$m=7$$, then $$P(n,m)=2.4\times 10^{-25}$$, so it is
+if, say, $$n=100$$ and $$m=7$$, then $$P(n,m)=2.4\times 10^{-25}$$, so it is
 virtually impossible to hit a perfect hash function by chance, yet `fast_perfect_hash`
 manages this without problem. How come? The answer is that the input `type_id`s are far from
 scattered in their 64-bit number space. Let us analyze this formally.
@@ -80,9 +80,25 @@ introduces a correction factor found empirically:
 $$P(h(x)\text{ is injective}) \approxeq \left(1-2^{\left\lceil \log_2 n\right\rceil-m-1}\right) \left( 1- \frac{n}{2^m}\right)^{0.75}.$$
 
 The figure plots this function for several choices of $$n$$ and $$m$$ (solid lines)
-alongside actual values obtained via numerical simulation (crosses):
+alongside actual values obtained via [numerical simulation](simulation.cpp) (crosses):
 
 ![chart](chart.png)
 
-TBW.
+Fit with actual data is somewhat poor for lower values of $$m$$, but in any case
+we have shown that the probability of finding a perfect hash function in the
+proposed setting is many orders of magnitude higher than for the general combinatorial
+case. Going back to candidate Boost.OpenMethod, in a typical program `std::type_info`s
+are packed together in a contiguous memory segment, although there are minor
+differences with the theoretical scenario analyzed:
 
+* Input `type_id`s are not necessarily contiguous (there may be types in between).
+The analysis holds if only we consider that the probability of finding a perfect hash
+function is _higher_ than if we consider the entire range from the lowest to the highest
+`type_id` (that is, including non-used inputs). 
+* Considered as numerical values, addresses are not of the form $$a+i$$, $$i=0,1,....,n-1$$,
+but rather follow a distribution $$a+di$$, where $$d$$ is `sizeof(std::type_info)`.
+This does not affect the analysis at all, as a valid constant $$C$$ for the former case
+produces a valid constant $$Cd$$ for the latter.
+
+So, the analysis is applicable to Boost.OpenMethod and explains its, at first sight, unreasonable
+efficiency at finding perfect hash functions for type IDs.

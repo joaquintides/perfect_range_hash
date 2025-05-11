@@ -1,4 +1,30 @@
-# perfect_range_hash
+# On candidate Boost.OpenMethod's perfect hashing
+
+Given a collection of `n` types `Ti`, candidate Boost.OpenMethod hashes their so-called
+`type_id`s (the addresses in memory of the types' associated `std::type_info` objects) using
+the utility [`fast_perfect_hash`](https://jll63.github.io/Boost.OpenMethod/#virtual_ptr_fast_perfect_hash)
+class. The hashing formula is simply
+
+```cpp
+C*x>>64-m // in 64-bit mode
+```
+
+where `x` is a `type_id`, `C` is a random 64-bit number, and the number of buckets is 2<sup>`m`</sup>.
+`fast_perfect_hash` selects the minimum `m` able to hold `n` elements and tries up to 100,000 random values
+for `C` till one of them happens to produce a perfect (no-collison) hadh function. If none is found,
+`m` is increased by 1 (the number of buckets is doubled), a viable `C` is searched again, and so on.
+
+This brute-force approach works very well, but there's an apparent contradiction: an arbitrary
+function $$f(x)$$ mapping $$n$$ pre-selected elements into $$2^m$$ buckets has a probability
+of being a perfect hash function equal to
+
+$$P(n,m)=\frac{\left(2^m\right)!}{2^{mn}\left(2^m-n\right)!}$$
+
+(see [this presentation](https://github.com/joaquintides/usingstdcpp2024) for details);
+ff, say, $$n=100$$ and $$m=7$$, then $$P(n,m)=2.4\times 10^{-25}$$, so it is
+virtually impossible to hit a perfect hash function by chance, yet `fast_perfect_hash`
+manages this without problem. How come? The answer is that the input `type_id`s are far from
+scattered in their 64-bit number space. Let us analyze this formally.
 
 We want to the estimate the probability that the function
 
@@ -29,9 +55,8 @@ The constant term $$C_qa$$ does not affect injectivity, so we can study the sequ
 
 $$h'_i=\left(C_qi+\left\lfloor\frac{C_r(a+i)}{B}\right\rfloor\right)\bmod 2^m$$
 
-and disregard the small-probability case $$C_q=0$$. Now, suppose for the moment being that
-$$\left\lfloor\frac{C_r(a+i)}{B}\right\rfloor$$ stays constant for
-all $$i=0,1,...,n-1$$; the period of 
+and disregard the small-probability case $$C_q=0$$. Now, ignore for moment the
+$$\left\lfloor\frac{C_r(a+i)}{B}\right\rfloor$$ term; the period of 
 
 $$h''_i=C_qi\bmod 2^m$$
 
@@ -41,26 +66,21 @@ $$T=\frac{2^m}{\gcd\left(C_q,2^m\right)}=\frac{2^m}{2^{v_2(C_q)}},$$
 
 where $$v_2(C_q)$$ is the exponent of the maximum power of 2 dividing $$C_q$$.
 So, the values $$h''_i$$ for $$i=0,1,...,n-1$$ are all distinct if $$T\ge n$$
-or $$v_2(C_q)\le m-\left\lceil \log_2 n \right\rceil$$, that is,
+or, equivalently, $$v_2(C_q)\le m-\left\lceil \log_2 n \right\rceil$$, that is,
 at least one of the 
 $$m-\left\lceil \log_2 n\right\rceil +1$$ least significant bits of $$C_q$$ is nonzero, which happens with probability
 
 $$P(T\ge n)=1-0.5^{m-\left\lceil \log_2 n\right\rceil+1}=1-2^{\left\lceil \log_2 n\right\rceil-m-1}.$$
 
-This does not complete the analysis, as we have to take into accout the
+This is not yet our required probability estimation, as we have to take into accout the
 perturbation introduced by $$\left\lfloor\frac{C_r(a+i)}{B}\right\rfloor$$.
-The number of times the value of this term changes for the range considered is
+We have failed to find a way to deal with this analytically, so the following
+introduces a correction factor found empirically:
 
-$$\left\lfloor\frac{C_r(a+n-1)}{B}\right\rfloor- \left\lfloor\frac{C_ra}{B}\right\rfloor \ge \left\lfloor\frac{C_r(n-1)}{B}\right\rfloor,$$
+$$P(h(x)\text{ is injective}) \approxeq \left(1-2^{\left\lceil \log_2 n\right\rceil-m-1}\right) \left( 1- \frac{n}{2^m}\right)^{0.75}.$$
 
-which, considering that $$C_r$$ is uniformly distributed in $$[0,B)$$, we can approximate
-in the average case by
+The figure plots this function for several choices of $$n$$ and $$m$$ (solid lines)
+alongside actual values obtained via numerical simulation (crosses):
 
-$$\frac{(B-1)(n-1)}{2B}.$$
-
-Each value change introduces a possibility of a collision with a probability that
-we estimate, without formal justification, as $$n/2^m$$.
-Wrapping it all together, we have
-
-$$P(h(x)\text{ is injective}) \approxeq \left(1-2^{\left\lceil \log_2 n\right\rceil-m-1}\right) \left( 1- \frac{n}{2^m}\right)^{\frac{(B-1)(n-1)}{2B}}.$$
+TBW.
 

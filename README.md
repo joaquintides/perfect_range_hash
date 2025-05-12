@@ -97,8 +97,9 @@ function is _higher_ than if we consider the entire range from the lowest to the
 `type_id` (that is, including non-used inputs). 
 * Considered as numerical values, addresses are not of the form $$a+i$$, $$i=0,1,....,n-1$$,
 but rather follow a distribution $$a+di$$, where $$d$$ is `sizeof(std::type_info)`.
-This does not affect the analysis at all, as a valid constant $$C$$ for the former case
-produces a valid constant $$Cd$$ for the latter.
+If $$C$$ is a valid multiplier for the former case, $$\lfloor C/d\rfloor$$ will be for
+the latter with high probability, and in fact the simulation program shows that the
+resulting probabilities are not significantly affected by the value of $$d$$.
 
 So, the analysis is applicable to Boost.OpenMethod and explains its seemingly unreasonable
 efficiency at finding perfect hash functions for type IDs.

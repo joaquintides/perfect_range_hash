@@ -55,7 +55,7 @@ The constant term $$C_qa$$ does not affect injectivity, so we can study the sequ
 
 $$h'_i=\left(C_qi+\left\lfloor\frac{C_r(a+i)}{B}\right\rfloor\right)\bmod 2^m$$
 
-and disregard the small-probability case $$C_q=0$$. Now, ignore for moment the
+and disregard the small-probability case $$C_q=0$$. Now, ignore for the moment being the
 $$\left\lfloor\frac{C_r(a+i)}{B}\right\rfloor$$ term; the period of 
 
 $$h''_i=C_qi\bmod 2^m$$

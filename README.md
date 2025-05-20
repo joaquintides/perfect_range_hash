@@ -6,7 +6,7 @@ the utility [`fast_perfect_hash`](https://jll63.github.io/Boost.OpenMethod/#virt
 class. The hashing formula is simply
 
 ```cpp
-C*x>>64-m // in 64-bit mode
+C*x>>(64-m) // in 64-bit mode
 ```
 
 where `x` is a `type_id`, `C` is a random 64-bit number, and the number of buckets is 2<sup>`m`</sup>.
